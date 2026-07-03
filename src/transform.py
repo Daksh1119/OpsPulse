@@ -1,37 +1,52 @@
 """
-transform.py
+ETL transformation pipeline for OpsPulse.
 
-Transforms raw weather JSON files into a cleaned and analytics-ready dataset.
+This module performs:
+1. Load raw weather JSON files
+2. Merge datasets
+3. Validate dataset
+4. Clean dataset
+5. Feature engineering
+6. Export processed dataset
 """
 
 from pathlib import Path
 import json
+
 import pandas as pd
 
-# ==============================
-# Configuration
-# ==============================
 
-RAW_FOLDER = Path("data/raw")
-PROCESSED_FOLDER = Path("data/processed")
-OUTPUT_FILE = PROCESSED_FOLDER / "weather_processed.csv"
-
-
-# ==============================
-# ETL Functions
-# ==============================
+# ===================================================
+# Extraction
+# ===================================================
 
 def load_weather_data(raw_folder: Path) -> list[pd.DataFrame]:
     """
-    Reads all JSON files from the raw folder and returns
-    a list of city-wise DataFrames.
+    Reads all weather JSON files and converts them into
+    individual city DataFrames.
+
+    Parameters
+    ----------
+    raw_folder : Path
+        Folder containing raw JSON files.
+
+    Returns
+    -------
+    list[pd.DataFrame]
     """
 
-    all_dataframes = []
+    dataframes = []
 
-    for file in raw_folder.glob("*.json"):
+    json_files = sorted(raw_folder.glob("*.json"))
 
-        print(f"Processing: {file.name}")
+    if not json_files:
+        raise FileNotFoundError(
+            f"No JSON files found inside {raw_folder}"
+        )
+
+    for file in json_files:
+
+        print(f"Processing {file.name}")
 
         city = file.stem
 
@@ -42,28 +57,42 @@ def load_weather_data(raw_folder: Path) -> list[pd.DataFrame]:
 
         hourly_df.insert(0, "city", city)
 
-        all_dataframes.append(hourly_df)
+        dataframes.append(hourly_df)
 
-    print(f"\nProcessed {len(all_dataframes)} cities.")
+    print(f"\nProcessed {len(dataframes)} cities.")
 
-    return all_dataframes
+    return dataframes
 
 
-def merge_dataframes(dataframes: list[pd.DataFrame]) -> pd.DataFrame:
+# ===================================================
+# Merge
+# ===================================================
+
+def merge_dataframes(
+    dataframes: list[pd.DataFrame]
+) -> pd.DataFrame:
     """
-    Merges all city DataFrames into one master DataFrame.
+    Combines multiple city DataFrames.
+
+    Parameters
+    ----------
+    dataframes : list[pd.DataFrame]
+
+    Returns
+    -------
+    pd.DataFrame
     """
 
     return pd.concat(dataframes, ignore_index=True)
 
 
-# ==============================
+# ===================================================
 # Validation
-# ==============================
+# ===================================================
 
 def validate_dataset(df: pd.DataFrame) -> None:
     """
-    Prints useful validation statistics.
+    Performs basic data validation.
     """
 
     print("\n" + "=" * 60)
@@ -92,7 +121,7 @@ def validate_dataset(df: pd.DataFrame) -> None:
 
     print("\n" + "=" * 60)
     print("UNIQUE CITIES")
-    print(df["city"].unique())
+    print(df["city"].nunique())
 
     print("\n" + "=" * 60)
     print("RECORDS PER CITY")
@@ -103,37 +132,37 @@ def validate_dataset(df: pd.DataFrame) -> None:
     print(df["is_day"].unique())
 
     print("\n" + "=" * 60)
-    print("FIRST FIVE TIMESTAMPS")
-    print(df["time"].head())
-
-    print("\n" + "=" * 60)
     print("TIME RANGE")
     print(df["time"].min())
     print(df["time"].max())
 
 
-# ==============================
+# ===================================================
 # Cleaning
-# ==============================
+# ===================================================
 
 def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     """
     Cleans the dataset.
     """
 
+    df = df.copy()
+
     df["time"] = pd.to_datetime(df["time"])
 
     return df
 
 
-# ==============================
+# ===================================================
 # Feature Engineering
-# ==============================
+# ===================================================
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Creates additional analytical features.
+    Creates analytical features.
     """
+
+    df = df.copy()
 
     df.insert(2, "date", df["time"].dt.date)
 
@@ -146,52 +175,35 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df.insert(
         6,
         "is_weekend",
-        df["day_of_week"].isin(["Saturday", "Sunday"])
+        df["day_of_week"].isin(
+            ["Saturday", "Sunday"]
+        ),
     )
 
     return df
 
 
-# ==============================
+# ===================================================
 # Export
-# ==============================
+# ===================================================
 
-def export_dataset(df: pd.DataFrame, output_path: Path) -> None:
+def export_dataset(
+    df: pd.DataFrame,
+    output_path: Path,
+) -> None:
     """
-    Exports the processed dataset to CSV.
+    Exports processed dataset.
     """
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    df.to_csv(output_path, index=False)
+    df.to_csv(
+        output_path,
+        index=False,
+    )
 
-    print("\nData exported successfully!")
-
+    print("\nDataset exported successfully.")
     print(output_path)
-
-
-# ==============================
-# Main Pipeline
-# ==============================
-
-def main():
-
-    all_dataframes = load_weather_data(RAW_FOLDER)
-
-    cities_df = merge_dataframes(all_dataframes)
-
-    validate_dataset(cities_df)
-
-    cities_df = clean_dataset(cities_df)
-
-    cities_df = engineer_features(cities_df)
-
-    export_dataset(cities_df, OUTPUT_FILE)
-
-
-# ==============================
-# Entry Point
-# ==============================
-
-if __name__ == "__main__":
-    main()
