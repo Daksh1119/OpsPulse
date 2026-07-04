@@ -2,12 +2,12 @@
 Main entry point for the OpsPulse ETL pipeline.
 """
 
-from config import (
+from src.config import (
     RAW_FOLDER,
     OUTPUT_FILE,
 )
 
-from transform import (
+from src.transform import (
     load_weather_data,
     merge_dataframes,
     validate_dataset,

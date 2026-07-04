@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opspulse"
+version = "1.0.0"
+description = "Weather ETL and Data Analysis Pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "pandas",
+    "requests",
+    "pytest",
+]
+
+[tool.setuptools]
+packages = ["src"]
