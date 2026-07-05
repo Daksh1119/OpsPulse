@@ -16,3 +16,6 @@ RAW_FOLDER = PROJECT_ROOT / "data" / "raw"
 PROCESSED_FOLDER = PROJECT_ROOT / "data" / "processed"
 
 OUTPUT_FILE = PROCESSED_FOLDER / "weather_processed.csv"
+
+LOG_FOLDER = Path("logs")
+LOG_FILE = LOG_FOLDER / "opspulse.log"

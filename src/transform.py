@@ -15,6 +15,10 @@ import json
 
 import pandas as pd
 
+from src.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 # ===================================================
 # Extraction
@@ -40,18 +44,27 @@ def load_weather_data(raw_folder: Path) -> list[pd.DataFrame]:
     json_files = sorted(raw_folder.glob("*.json"))
 
     if not json_files:
+        logger.error(
+            f"No JSON files found inside {raw_folder}"
+        )
+
         raise FileNotFoundError(
             f"No JSON files found inside {raw_folder}"
         )
 
     for file in json_files:
 
-        print(f"Processing {file.name}")
+        logger.info(f"Processing {file.name}")
 
         city = file.stem
 
-        with open(file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            with open(file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+        except json.JSONDecodeError:
+            logger.exception(f"Invalid JSON: {file.name}")
+            continue
 
         hourly_df = pd.DataFrame(data["hourly"])
 
@@ -59,7 +72,9 @@ def load_weather_data(raw_folder: Path) -> list[pd.DataFrame]:
 
         dataframes.append(hourly_df)
 
-    print(f"\nProcessed {len(dataframes)} cities.")
+    logger.info(
+    f"Successfully processed {len(dataframes)} cities."
+    )
 
     return dataframes
 
@@ -83,58 +98,89 @@ def merge_dataframes(
     pd.DataFrame
     """
 
-    return pd.concat(dataframes, ignore_index=True)
+    if not dataframes:
+        logger.error("No dataframes to merge.")
+        raise ValueError("No dataframes supplied.")
+
+    merged_df = pd.concat(
+    dataframes,
+    ignore_index=True
+    )
+
+    logger.info(
+        f"Merged {len(dataframes)} dataframes "
+        f"into shape {merged_df.shape}"
+    )
+
+    return merged_df
 
 
 # ===================================================
 # Validation
 # ===================================================
 
-def validate_dataset(df: pd.DataFrame) -> None:
+def validate_dataset(df: pd.DataFrame) -> True:
     """
-    Performs basic data validation.
+    Performs basic data validation on the processed dataset.
     """
 
-    print("\n" + "=" * 60)
-    print("DATASET SHAPE")
-    print(df.shape)
+    logger.info("=" * 60)
+    logger.info("Starting dataset validation.")
 
-    print("\n" + "=" * 60)
-    print("SAMPLE DATA")
-    print(df.head())
+    # Dataset Shape
+    logger.info(f"Dataset Shape: {df.shape}")
 
-    print("\n" + "=" * 60)
-    print("DATA TYPES")
-    print(df.dtypes)
+    # Columns
+    logger.info(f"Columns: {list(df.columns)}")
 
-    print("\n" + "=" * 60)
-    print("MISSING VALUES")
-    print(df.isnull().sum())
+    # Data Types
+    logger.info(f"Data Types:\n{df.dtypes}")
 
-    print("\n" + "=" * 60)
-    print("DUPLICATE ROWS")
-    print(df.duplicated().sum())
+    # Missing Values
+    missing_values = df.isnull().sum().sum()
 
-    print("\n" + "=" * 60)
-    print("SUMMARY STATISTICS")
-    print(df.describe())
+    if missing_values == 0:
+        logger.info("No missing values found.")
+    else:
+        logger.warning(
+            f"Dataset contains {missing_values} missing value(s)."
+        )
+        logger.warning(f"\n{df.isnull().sum()}")
 
-    print("\n" + "=" * 60)
-    print("UNIQUE CITIES")
-    print(df["city"].nunique())
+    # Duplicate Rows
+    duplicate_rows = df.duplicated().sum()
 
-    print("\n" + "=" * 60)
-    print("RECORDS PER CITY")
-    print(df["city"].value_counts())
+    if duplicate_rows == 0:
+        logger.info("No duplicate rows found.")
+    else:
+        logger.warning(
+            f"Dataset contains {duplicate_rows} duplicate row(s)."
+        )
 
-    print("\n" + "=" * 60)
-    print("UNIQUE VALUES IN is_day")
-    print(df["is_day"].unique())
+    # Unique Cities
+    logger.info(
+        f"Number of Cities: {df['city'].nunique()}"
+    )
 
-    print("\n" + "=" * 60)
-    print("TIME RANGE")
-    print(df["time"].min())
-    print(df["time"].max())
+    # Records per City
+    logger.info(
+        f"Records per City:\n{df['city'].value_counts()}"
+    )
+
+    # is_day Values
+    logger.info(
+        f"Unique values in 'is_day': "
+        f"{df['is_day'].unique().tolist()}"
+    )
+
+    # Time Range
+    logger.info(
+        f"Time Range: "
+        f"{df['time'].min()} --> {df['time'].max()}"
+    )
+
+    logger.info("Dataset validation completed successfully.")
+    logger.info("=" * 60)
 
 
 # ===================================================
@@ -146,9 +192,17 @@ def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     Cleans the dataset.
     """
 
-    df = df.copy()
+    df = df.copy(deep=False)
+
+    logger.info(
+    "Converting 'time' column to datetime."
+    )
 
     df["time"] = pd.to_datetime(df["time"])
+
+    logger.info(
+    "Dataset cleaned successfully."
+    )
 
     return df
 
@@ -162,7 +216,11 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     Creates analytical features.
     """
 
-    df = df.copy()
+    logger.info(
+    "Starting feature engineering."
+    )
+
+    df = df.copy(deep=False)
 
     df.insert(2, "date", df["time"].dt.date)
 
@@ -180,8 +238,16 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
         ),
     )
 
-    return df
+    logger.info(
+    "Created features: "
+    "date, hour, day_of_week, month, is_weekend"
+    )
 
+    logger.info(
+    f"Final dataset shape: {df.shape}"
+    )
+
+    return df
 
 # ===================================================
 # Export
@@ -205,5 +271,7 @@ def export_dataset(
         index=False,
     )
 
-    print("\nDataset exported successfully.")
-    print(output_path)
+    logger.info(
+    f"Processed dataset exported to "
+    f"{output_path}"
+    )

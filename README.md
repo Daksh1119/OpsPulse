@@ -23,27 +23,29 @@ The project follows a complete ETL (Extract → Transform → Load) workflow:
 ## Project Architecture
 
 ```
-                Open-Meteo API
-                       │
-                       ▼
-            Fetch Weather Data
-                       │
-                       ▼
-          Store Raw JSON Files
-                       │
-                       ▼
-         ETL Transformation Pipeline
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-        ▼              ▼              ▼
-   Validation     Data Cleaning   Feature Engineering
-        │
-        ▼
-   Processed CSV Dataset
-        │
-        ▼
- Exploratory Data Analysis (Upcoming)
+               Open-Meteo API
+                      │
+                      ▼
+              Fetch Weather Data
+                      │
+                      ▼
+             Store Raw JSON Files
+                      │
+                      ▼
+           ETL Transformation Pipeline
+                      │
+      ┌───────────────┼────────────────┐
+      ▼               ▼                ▼
+ Validation      Data Cleaning   Feature Engineering
+                      │
+                      ▼
+          Processed CSV Dataset
+                │          │
+                ▼          ▼
+        Automated Tests   EDA Notebook
+                             │
+                             ▼
+                  Power BI Dashboard (Upcoming)
 ```
 
 ---
@@ -51,13 +53,17 @@ The project follows a complete ETL (Extract → Transform → Load) workflow:
 ## Features
 
 - Modular ETL pipeline
-- Weather data collection for 20 Indian cities
+- Automated weather data collection from Open-Meteo API
+- Hourly forecast collection for 20 Indian cities
 - Raw JSON data storage
-- Automatic DataFrame generation
-- Dataset validation
-- Datetime conversion
+- Data transformation using Pandas
+- Dataset validation and quality checks
+- Datetime parsing and cleaning
 - Feature engineering
-- Automated testing using Pytest
+- Production-style logging
+- Automated testing with Pytest
+- Exploratory Data Analysis (EDA)
+- Statistical analysis and visualizations
 - Analytics-ready processed dataset
 
 ---
@@ -203,6 +209,28 @@ pytest -v
 
 ---
 
+## Exploratory Data Analysis
+
+The processed dataset has been analyzed using Jupyter Notebook, Pandas, Matplotlib, and Seaborn.
+
+The EDA includes:
+
+- City-wise temperature comparison
+- Humidity analysis
+- Wind speed analysis
+- Atmospheric pressure analysis
+- Precipitation analysis
+- Hourly temperature trends
+- Temperature variation analysis
+- Weekday vs Weekend comparison
+- Weather condition frequency analysis
+- Correlation analysis
+- Distribution analysis
+
+Each visualization is accompanied by statistical insights and business observations.
+
+---
+
 ## Installation
 
 Clone the repository
@@ -251,34 +279,37 @@ python -m src.main
 
 ## Current Status
 
-Completed
+### Completed
 
-- API Integration
-- ETL Pipeline
+- Open-Meteo API Integration
+- Modular ETL Pipeline
 - Data Validation
 - Data Cleaning
 - Feature Engineering
-- Automated Testing
-
-In Progress
-
+- Production Logging
+- Automated Testing (Pytest)
 - Exploratory Data Analysis
-- Data Visualization
-- Dashboard
-- Documentation Enhancements
+- Statistical Visualizations
+- Project Documentation
+
+### In Progress
+
+- Interactive Power BI Dashboard
+- ETL Pipeline Automation
+- GitHub Repository Enhancements
 
 ---
 
 ## Future Improvements
 
 - Interactive Power BI Dashboard
-- Historical Weather Analysis
-- Scheduled Data Collection
-- Database Integration
-- Data Quality Reports
-- Docker Support
-- CI/CD Pipeline
-- Logging Framework
+- Automated ETL Scheduling
+- GitHub Actions CI/CD
+- Database Integration (PostgreSQL/Supabase)
+- Docker Containerization
+- Historical Weather Trend Analysis
+- Data Quality Reporting
+- Cloud Deployment
 
 ---
 
@@ -287,13 +318,16 @@ In Progress
 This project demonstrates practical experience with:
 
 - REST API Integration
-- ETL Pipeline Design
-- Data Wrangling
-- Data Validation
+- End-to-End ETL Pipeline Development
+- Data Wrangling with Pandas
 - Feature Engineering
-- Software Testing
-- Python Project Structuring
-- Git Version Control
+- Exploratory Data Analysis (EDA)
+- Statistical Data Analysis
+- Data Visualization
+- Production Logging
+- Automated Testing with Pytest
+- Modular Python Project Architecture
+- Git & GitHub Version Control
 
 ---
 
