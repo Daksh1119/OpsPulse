@@ -9,6 +9,11 @@ from src.config import (
 
 from src.logger import get_logger
 
+from src.database import (
+    test_connection,
+    upload_weather_data,
+)
+
 from src.transform import (
     load_weather_data,
     merge_dataframes,
@@ -93,6 +98,22 @@ def main() -> None:
         )
 
         logger.info("Dataset export completed successfully.")
+
+        # ===================================================
+        # Upload to Supabase
+        # ===================================================
+
+        logger.info("Testing Supabase connection.")
+
+        test_connection()
+
+        logger.info("Supabase connection successful.")
+
+        logger.info("Uploading processed dataset to Supabase.")
+
+        upload_weather_data(cities_df)
+
+        logger.info("Dataset uploaded successfully to Supabase.")
 
         logger.info("OpsPulse ETL Pipeline Finished Successfully.")
         logger.info("=" * 60)

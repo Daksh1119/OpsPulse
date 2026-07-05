@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: opspulse
+Version: 1.0.0
+Summary: Weather ETL and Data Analysis Pipeline
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pandas
+Requires-Dist: requests
+Requires-Dist: pytest

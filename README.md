@@ -8,44 +8,51 @@ A modular end-to-end ETL pipeline that collects, transforms, validates, and prep
 
 OpsPulse automates the process of collecting hourly weather forecast data for multiple Indian cities and transforming it into an analytics-ready dataset.
 
-The project follows a complete ETL (Extract → Transform → Load) workflow:
+The project follows a production-style ETL (Extract → Transform → Load) workflow:
 
-- Extract weather forecast data from the Open-Meteo API
+- Extract hourly weather forecast data from the Open-Meteo API
 - Store raw API responses as JSON files
 - Transform nested JSON into structured Pandas DataFrames
 - Validate and clean the dataset
-- Engineer additional analytical features
-- Export a processed dataset for further analysis
-- Verify pipeline correctness using Pytest
+- Engineer analytical features
+- Export an analytics-ready CSV dataset
+- Upsert processed records into Supabase
+- Automate testing using Pytest
+- Schedule automated ETL execution using GitHub Actions
 
 ---
 
 ## Project Architecture
 
-```
-               Open-Meteo API
-                      │
-                      ▼
+```text
+                Open-Meteo API
+                       │
+                       ▼
               Fetch Weather Data
-                      │
-                      ▼
-             Store Raw JSON Files
-                      │
-                      ▼
-           ETL Transformation Pipeline
-                      │
-      ┌───────────────┼────────────────┐
-      ▼               ▼                ▼
+                       │
+                       ▼
+               Store Raw JSON Files
+                       │
+                       ▼
+             ETL Transformation Pipeline
+                       │
+      ┌────────────────┼────────────────┐
+      ▼                ▼                ▼
  Validation      Data Cleaning   Feature Engineering
-                      │
-                      ▼
-          Processed CSV Dataset
-                │          │
-                ▼          ▼
-        Automated Tests   EDA Notebook
-                             │
-                             ▼
-                  Power BI Dashboard (Upcoming)
+                       │
+                       ▼
+             Analytics-ready Dataset
+                  │             │
+                  ▼             ▼
+          Processed CSV     Supabase Database
+                  │
+                  ▼
+        Power BI Dashboard (Upcoming)
+
+             ▲
+             │
+      GitHub Actions
+     (Daily Automation)
 ```
 
 ---
@@ -65,6 +72,10 @@ The project follows a complete ETL (Extract → Transform → Load) workflow:
 - Exploratory Data Analysis (EDA)
 - Statistical analysis and visualizations
 - Analytics-ready processed dataset
+- Cloud database integration with Supabase
+- Automated daily ETL using GitHub Actions
+- Environment-based configuration using .env
+- Batch upsert into PostgreSQL (Supabase)
 
 ---
 
@@ -73,7 +84,11 @@ The project follows a complete ETL (Extract → Transform → Load) workflow:
 - Python 3.10+
 - Pandas
 - Requests
+- Supabase
+- PostgreSQL
+- python-dotenv
 - Pytest
+- GitHub Actions
 - Jupyter Notebook
 - Open-Meteo API
 - Git & GitHub
@@ -82,13 +97,19 @@ The project follows a complete ETL (Extract → Transform → Load) workflow:
 
 ## Project Structure
 
-```
+```text
 OpsPulse/
 │
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── daily-etl.yml
+│
 ├── data/
-│   ├── input/
 │   ├── raw/
 │   └── processed/
+│
+├── logs/
 │
 ├── notebooks/
 │   └── eda.ipynb
@@ -96,18 +117,21 @@ OpsPulse/
 ├── src/
 │   ├── __init__.py
 │   ├── config.py
+│   ├── database.py
 │   ├── fetch_weather.py
-│   ├── transform.py
-│   └── main.py
+│   ├── logger.py
+│   ├── main.py
+│   └── transform.py
 │
 ├── tests/
 │   └── test_transform.py
 │
+├── .env.example
+├── .gitignore
 ├── pyproject.toml
 ├── pytest.ini
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
 ---
@@ -131,11 +155,13 @@ OpsPulse/
 
 ### 3. Load
 
-Export the final processed dataset as:
+The processed dataset is loaded into two destinations:
 
-```
-data/processed/weather_processed.csv
-```
+- Local analytics-ready CSV
+  - `data/processed/weather_processed.csv`
+
+- Supabase PostgreSQL database
+  - Batch upsert using a composite unique key (`city`, `forecast_time`)
 
 ---
 
@@ -206,6 +232,44 @@ Run tests:
 ```bash
 pytest -v
 ```
+
+---
+
+## Cloud Database Integration
+
+OpsPulse stores processed weather forecasts in a Supabase PostgreSQL database.
+
+Features:
+
+- Secure environment variable configuration
+- Batch upload for improved performance
+- Upsert strategy to prevent duplicate records
+- Composite unique constraint on (`city`, `forecast_time`)
+- Production-ready logging and error handling
+
+---
+
+## Automation
+
+The ETL pipeline is fully automated using GitHub Actions.
+
+### Continuous Integration
+
+- Runs automatically on every push and pull request
+- Installs dependencies
+- Executes automated Pytest suite
+
+### Daily ETL Pipeline
+
+Runs every day at **08:00 AM IST**.
+
+Workflow:
+
+1. Fetch latest weather forecast
+2. Transform and validate data
+3. Engineer analytical features
+4. Export processed CSV
+5. Upsert records into Supabase
 
 ---
 
@@ -291,25 +355,24 @@ python -m src.main
 - Exploratory Data Analysis
 - Statistical Visualizations
 - Project Documentation
+- ETL Pipeline Automation
+- GitHub Repository Enhancements
+
 
 ### In Progress
 
 - Interactive Power BI Dashboard
-- ETL Pipeline Automation
-- GitHub Repository Enhancements
 
 ---
 
 ## Future Improvements
 
-- Interactive Power BI Dashboard
-- Automated ETL Scheduling
-- GitHub Actions CI/CD
-- Database Integration (PostgreSQL/Supabase)
 - Docker Containerization
 - Historical Weather Trend Analysis
-- Data Quality Reporting
-- Cloud Deployment
+- Power BI Dashboard Deployment
+- Data Quality Monitoring
+- Alerting & Notifications
+- REST API for Weather Analytics
 
 ---
 

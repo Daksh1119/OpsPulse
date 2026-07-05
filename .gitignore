@@ -1,10 +1,17 @@
-# Virtual Environment
-.venv/
-
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+
+# Virtual Environment
+.venv/
+venv/
+
+# Environment Variables
+.env
+
+# Pytest
+.pytest_cache/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -12,24 +19,12 @@ __pycache__/
 # VS Code
 .vscode/
 
-# OS files
-.DS_Store
-Thumbs.db
-
-# Environment variables
-.env
-
-# Test cache
-.pytest_cache/
-
-# Coverage
-.coverage
-htmlcov/
-
 # Logs
 logs/
+*.log
 
-# Python build
-build/
-dist/
-*.egg-info/
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

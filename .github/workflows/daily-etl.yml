@@ -1,18 +1,21 @@
-name: OpsPulse CI Pipeline
+name: Daily Weather ETL
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    # Every day at 08:00 IST
+    - cron: "30 2 * * *"
 
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build-and-test:
+  daily-etl:
 
     runs-on: ubuntu-latest
+
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
     steps:
 
@@ -32,10 +35,10 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Fetch Latest Weather Data
+        run: |
+          python -m src.fetch_weather
+
       - name: Run ETL Pipeline
         run: |
           python -m src.main
-
-      - name: Run Pytest
-        run: |
-          pytest -v
