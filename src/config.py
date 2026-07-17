@@ -54,3 +54,15 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv(
     "SUPABASE_SERVICE_ROLE_KEY"
 )
+
+# =====================================================
+# AWS S3 Configuration (raw data lake layer)
+# =====================================================
+
+AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
+
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+
+# Toggle so local-only runs (e.g. tests, CI without AWS secrets
+# configured yet) don't fail if S3 isn't set up.
+S3_UPLOAD_ENABLED = os.getenv("S3_UPLOAD_ENABLED", "false").lower() == "true"
