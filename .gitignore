@@ -28,3 +28,6 @@ logs/
 
 # Windows
 Thumbs.db
+
+data/raw/*.json
+data/processed/*.csv
