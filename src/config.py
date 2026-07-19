@@ -66,3 +66,14 @@ S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 # Toggle so local-only runs (e.g. tests, CI without AWS secrets
 # configured yet) don't fail if S3 isn't set up.
 S3_UPLOAD_ENABLED = os.getenv("S3_UPLOAD_ENABLED", "false").lower() == "true"
+
+
+# =====================================================
+# AWS CloudWatch Configuration (centralized logging + alerting)
+# =====================================================
+
+CLOUDWATCH_ENABLED = os.getenv("CLOUDWATCH_ENABLED", "false").lower() == "true"
+
+CLOUDWATCH_LOG_GROUP = os.getenv("CLOUDWATCH_LOG_GROUP", "/opspulse/etl")
+
+CLOUDWATCH_LOG_STREAM = os.getenv("CLOUDWATCH_LOG_STREAM", "daily-run")
